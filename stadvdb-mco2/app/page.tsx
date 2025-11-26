@@ -1,9 +1,13 @@
 "use server";
 
-import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_status";
-import NodeStatus from "@/src-mco2/components/NodeStatus";
 import Link from "next/link";
+
+import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_status";
+
 import { cn } from "@/src-mco2/lib/cn";
+
+import IsolationChangeBtn from "@/src-mco2/components/IsolationChangeBtn";
+import NodeStatus from "@/src-mco2/components/NodeStatus";
 
 const node0_config = {
   host: process.env.DB_HOST || "",
@@ -67,6 +71,13 @@ export default async function Home() {
           </ul>
         </div>
       </main>
+
+      <div className="fixed bottom-4 right-4 z-50">
+        <IsolationChangeBtn
+          currentLevel={isolation as "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE"}
+          disable={isolation == "UNKNOWN"}
+          className="border border-gray-600 border-dashed rounded-md px-4 py-6" />
+      </div>
     </div>
   );
 }
