@@ -18,7 +18,7 @@ export default function NodeStatus({
 }: NodeStatusProps) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      [ <span className="mx-2 min-w-fit">{name}: </span> {online ? "Online" : "Offline"} <StatusIndicator className="ml-1 mr-2" online={online} /> ] Last Tx: { last_tx.toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" }) }
+      [<span className="mx-1 min-w-fit">{name}: </span> {online ? "Online" : "Offline"} <StatusIndicator className="mx-1" online={online} />] Last Tx: { last_tx.toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" }) }
     </div>
   );
 }

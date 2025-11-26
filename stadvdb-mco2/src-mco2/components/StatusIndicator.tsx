@@ -13,7 +13,10 @@ export default function StatusIndicator({
 }: StatusIndicatorProps) {
   return (
     <span
-      className= {cn(`w-2 h-2 rounded-full ${online ? "bg-green-500" : "bg-red-500"}`, className)}
+      className= {cn(
+        `w-2 h-2 rounded-full ${online ? "bg-green-500" : "bg-red-500"}`,
+        "animate-pulse",
+        className)}
     > </span>
   );
 }
