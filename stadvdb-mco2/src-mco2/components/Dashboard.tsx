@@ -55,7 +55,7 @@ export default function NodeDashboard({ nodeName, headerAction }: NodeDashboardP
               value={tconst} 
               onChange={(e) => setTconst(e.target.value)}
               className="w-full bg-gray-900 border border-gray-600 p-3 rounded text-lg focus:outline-none focus:border-blue-500"
-              placeholder="Enter Movie ID"
+              placeholder="Enter Tconst ID"
             />
           </div>
 
