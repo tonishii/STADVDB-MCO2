@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 
 export const db0 = mysql.createPool({
-  host: process.env.DB_HOST,
+  host: process.env.NODE0_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
@@ -10,7 +10,7 @@ export const db0 = mysql.createPool({
 });
 
 export const db1 = mysql.createPool({
-  host: process.env.DB_HOST,
+  host: process.env.NODE1_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
@@ -19,7 +19,7 @@ export const db1 = mysql.createPool({
 });
 
 export const db2 = mysql.createPool({
-  host: process.env.DB_HOST,
+  host: process.env.NODE2_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
