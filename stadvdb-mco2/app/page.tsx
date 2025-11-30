@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_status";
+import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_methods";
 
 import { cn } from "@/src-mco2/lib/cn";
 

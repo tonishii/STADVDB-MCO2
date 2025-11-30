@@ -30,3 +30,17 @@ export async function getIsolationLevel(): Promise<string> {
     if (conn) conn.release();
   }
 }
+
+export async function getRows(pool: Pool, query: string) {
+  let conn;
+  try {
+    conn = await pool.getConnection();
+    const [rows] = await conn.query(query);
+    return rows;
+  } catch (err) {
+    console.error("Failed to get rows", err);
+    return [];
+  } finally {
+    if (conn) conn.release();
+  }
+}
