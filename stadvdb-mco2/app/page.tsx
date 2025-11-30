@@ -5,10 +5,12 @@ import { getIsolationLevel } from "@/src-mco2/lib/server_methods";
 export default async function Page() {
   const isolation = await getIsolationLevel();
   const nodeName = process.env.NEXT_PUBLIC_CURRENT_NODE || "Unknown Node";
+  const isolationLevel = await getIsolationLevel();
 
   return (
     <NodeDashboard 
       nodeName={nodeName}
+      currentIsolation={isolationLevel}
       headerAction={
         <IsolationChangeBtn 
           currentLevel={isolation as any} 

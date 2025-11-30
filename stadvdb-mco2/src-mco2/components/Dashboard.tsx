@@ -5,10 +5,11 @@ import { readTitleWithDelay } from "@/src-mco2/lib/transaction";
 
 interface NodeDashboardProps {
   nodeName: string;
+  currentIsolation: string;
   headerAction: React.ReactNode; 
 }
 
-export default function NodeDashboard({ nodeName, headerAction }: NodeDashboardProps) {
+export default function NodeDashboard({ nodeName, currentIsolation, headerAction }: NodeDashboardProps) {
   const [tconst, setTconst] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,9 @@ export default function NodeDashboard({ nodeName, headerAction }: NodeDashboardP
         <div>
             <h1 className="text-3xl font-bold text-blue-400">{nodeName}</h1>
             <p className="text-gray-400">Distributed Transaction Manager</p>
+            <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded border border-purple-700">
+                Isolation: {currentIsolation}
+            </span>
         </div>
         
         <div>
