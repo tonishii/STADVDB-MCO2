@@ -22,13 +22,13 @@ export default function SimulateForm({
         <input
           className="rounded-md px-2 py-1 border border-neutral-700 w-fit"
           type="text"
-          placeholder="Enter Data Item (tconst) here..."
+          placeholder="Enter tconst here..."
           name="tconst" />
         <button
           className="w-fit bg-blue-600 text-white px-2 rounded-md hover:bg-blue-500 transition-colors duration-200"
           type="submit"
           disabled={pending}>
-          Simulate Read
+          Simulate Case
         </button>
       </form>
 

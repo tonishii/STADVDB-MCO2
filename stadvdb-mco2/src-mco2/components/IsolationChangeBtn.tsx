@@ -1,7 +1,7 @@
 "use server";
 
 import { changeIsolationLevel } from "../actions/isolation_change";
-import { cn } from "../lib/cn";
+import { cn } from "../utils/cn";
 
 interface IsolationChangeBtnProps {
   currentLevel?: "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE";
