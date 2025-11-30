@@ -1,9 +1,7 @@
 "use server";
 
+import { changeIsolationLevel } from "../actions/isolation_change";
 import { cn } from "../lib/cn";
-import { setIsolationLevel } from "../utils/set_isolation";
-import { db0, db1, db2 } from "../db";
-import { revalidatePath } from "next/cache";
 
 interface IsolationChangeBtnProps {
   currentLevel?: "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE";
@@ -16,21 +14,6 @@ export default async function IsolationChangeBtn({
   className,
   disable,
 }: IsolationChangeBtnProps) {
-  async function changeIsolationLevel(formData: FormData) {
-    "use server";
-
-    let isolation_level = formData.get("isolation_level") as string;
-    isolation_level = isolation_level.replace(/-/g, " ");
-
-    await Promise.all([
-      setIsolationLevel(db0, isolation_level),
-      setIsolationLevel(db1, isolation_level),
-      setIsolationLevel(db2, isolation_level),
-    ]);
-
-    revalidatePath("/");
-  }
-
   return (
     <form
       key={currentLevel}
