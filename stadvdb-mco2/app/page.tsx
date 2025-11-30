@@ -9,6 +9,7 @@ import { cn } from "@/src-mco2/lib/cn";
 import IsolationChangeBtn from "@/src-mco2/components/IsolationChangeBtn";
 import NodeStatus from "@/src-mco2/components/NodeStatus";
 import { db0, db1, db2 } from "@/src-mco2/db";
+import { case2 } from "@/src-mco2/actions/conc_cases";
 
 export default async function Home() {
   const node0_status = await getNodeStatus(db0);
@@ -40,6 +41,16 @@ export default async function Home() {
           <ul className="list-disc list-inside space-y-2 text-gray-500">
             <li>Case #1: Concurrent transactions in two or more nodes are reading the same data item</li>
             <li>Case #2: At least one transaction in the three nodes is writing (update / delete) and the other concurrent transactions are reading the same data item</li>
+            <div className="flex flex-col space-y-2 w-full">
+              <input type="text" placeholder="Enter Data Item (tconst) here..." className="rounded-md px-4 border border-neutral-700 w-fit" />
+              <button
+                className="w-fit bg-blue-600 text-white px-2 rounded-md hover:bg-blue-500 transition-colors duration-200"
+                onClick={case2}>
+                Simulate Read
+              </button>
+              <div></div>
+            </div>
+
             <li>Case #3: Concurrent transactions in two or more nodes are writing (update / delete) the same data item</li>
           </ul>
         </div>
