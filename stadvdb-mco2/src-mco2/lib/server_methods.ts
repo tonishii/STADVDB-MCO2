@@ -31,11 +31,11 @@ export async function getIsolationLevel(): Promise<string> {
   }
 }
 
-export async function getRows(pool: Pool, query: string) {
+export async function getRows(pool: Pool, query: { sql: string; params?: string[] }) {
   let conn;
   try {
     conn = await pool.getConnection();
-    const [rows] = await conn.query(query);
+    const [rows] = await conn.query(query.sql, query.params || []);
     return rows;
   } catch (err) {
     console.error("Failed to get rows", err);

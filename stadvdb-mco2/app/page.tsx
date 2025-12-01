@@ -22,18 +22,16 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center font-sans">
       <main className="flex min-h-screen w-full max-w-4xl flex-col space-y-20 items-center py-32 px-16 sm:items-start">
-        <div className="">
-          <div className="flex flex-col w-full items-start mb-1">
-            <Link href="/node0" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
-              <NodeStatus name="Node 0" online={node0_status} />
-            </Link>
-            <Link href="/node1" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
-              <NodeStatus name="Node 1" online={node1_status} />
-            </Link>
-            <Link href="/node2" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
-              <NodeStatus name="Node 2" online={node2_status} />
-            </Link>
-          </div>
+        <div className="flex space-x-2 w-full items-start mb-12">
+          <Link href="/node0" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+            <NodeStatus name="Node 0" online={node0_status} />
+          </Link>
+          <Link href="/node1" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+            <NodeStatus name="Node 1" online={node1_status} />
+          </Link>
+          <Link href="/node2" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+            <NodeStatus name="Node 2" online={node2_status} />
+          </Link>
           <p className="glow-white">Current Isolation Level: <span className={cn(isolation == "UNKNOWN" ? "text-red-500" : "text-green-500", "[text-shadow:none]")}>{isolation}</span></p>
         </div>
 
