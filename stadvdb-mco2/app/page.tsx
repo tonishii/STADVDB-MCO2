@@ -11,6 +11,8 @@ import { cn } from "@/src-mco2/utils/cn";
 import IsolationChangeBtn from "@/src-mco2/components/IsolationChangeBtn";
 import NodeStatus from "@/src-mco2/components/NodeStatus";
 import SimulateForm from "@/src-mco2/components/SimulateForm";
+import InsertMovieForm from "@/src-mco2/components/InsertTitleForm";
+import ReportsPanel from "@/src-mco2/components/ReportsPanel";
 
 export default async function Home() {
   const node0_status = await getNodeStatus(db0);
@@ -33,6 +35,12 @@ export default async function Home() {
             <NodeStatus name="Node 2" online={node2_status} />
           </Link>
           <p className="glow-white">Current Isolation Level: <span className={cn(isolation == "UNKNOWN" ? "text-red-500" : "text-green-500", "[text-shadow:none]")}>{isolation}</span></p>
+        </div>
+
+        <div className="w-full">
+            <h1 className="font-semibold text-2xl glow-white mb-6">Database Management</h1>
+            <InsertMovieForm />
+            <ReportsPanel />
         </div>
 
         <div className="">
