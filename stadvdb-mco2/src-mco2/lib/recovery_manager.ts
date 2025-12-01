@@ -24,48 +24,54 @@ export async function recoverTransaction(node: number) {
 
   for (const [key, log] of txMap.entries()) {
     const committed = log.some(
-      (t) => t.operation == "COMMIT" && t.status !== "COMPLETED"
+      (t) =>
+        (t.operation === "COMMIT" && t.status !== "REPLICATED") ||
+        t.status !== "COMPLETED"
     );
     if (committed) {
-      const operations = log.filter((t) => {
-        return ["INSERT", "UPDATE", "DELETE"].includes(t.operation);
-      });
+      const operations = log.filter((t) =>
+        ["INSERT", "UPDATE", "DELETE"].includes(t.operation)
+      );
       for (const op of operations) {
+        const pool = nodePools[op.node];
         if (op.isReplication && op.targetNode) {
-          const pool = nodePools[op.node];
           const redoPool = nodePools[op.targetNode];
-          await redo(op, pool);
-          await redo(op, redoPool);
+          await redo(op, pool, op.node);
+          await redo(op, redoPool, op.targetNode);
           op.status = "REPLICATED";
         } else {
-          const pool = nodePools[op.node];
-          await redo(op, pool);
+          await redo(op, pool, op.node);
           op.status = "COMPLETED";
         }
-        op.recoveryAction = "REDO";
 
-        console.log("redo");
+        op.recoveryAction = "REDO";
+        console.log(`REDO: ${op.operation} on Node ${op.node}`);
       }
     } else {
       const operations = log
-        .filter((t) => {
-          return ["INSERT", "UPDATE", "DELETE"].includes(t.operation);
-        })
+        .filter(
+          (t) =>
+            ["INSERT", "UPDATE", "DELETE"].includes(t.operation) &&
+            t.status !== "ABORTED" &&
+            t.status !== "REPLICATED"
+        )
         .reverse();
+
       for (const op of operations) {
+        const pool = nodePools[op.node];
+
         if (op.isReplication && op.targetNode) {
-          const pool = nodePools[op.node];
           const undoPool = nodePools[op.targetNode];
-          await undo(op, undoPool);
-          await undo(op, pool);
+          await undo(op, undoPool, op.targetNode);
+          await undo(op, pool, op.node);
           op.status = "REPLICATED";
         } else {
-          const pool = nodePools[op.node];
-          await undo(op, pool);
+          await undo(op, pool, op.node);
           op.status = "ABORTED";
         }
+
         op.recoveryAction = "UNDO";
-        console.log("undo");
+        console.log(`UNDO: ${op.operation} on Node ${op.node}`);
       }
     }
   }

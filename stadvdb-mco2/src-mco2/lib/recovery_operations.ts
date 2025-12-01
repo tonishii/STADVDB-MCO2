@@ -1,9 +1,9 @@
 import { TransactionLogEntry } from "./schema";
 import { Pool } from "mysql2/promise";
 
-export async function redo(tx: TransactionLogEntry, pool: Pool) {
+export async function redo(tx: TransactionLogEntry, pool: Pool, node: string) {
   const conn = await pool.getConnection();
-  const tableName = `node${tx.node}_titles`;
+  const tableName = `node${node}_titles`;
   try {
     switch (tx.operation) {
       case "INSERT":
@@ -62,9 +62,9 @@ export async function redo(tx: TransactionLogEntry, pool: Pool) {
   }
 }
 
-export async function undo(tx: TransactionLogEntry, pool: Pool) {
+export async function undo(tx: TransactionLogEntry, pool: Pool, node: string) {
   const conn = await pool.getConnection();
-  const tableName = `node${tx.node}_titles`;
+  const tableName = `node${node}_titles`;
   try {
     switch (tx.operation) {
       case "INSERT":
