@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 
-import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_methods";
+import {
+  getIsolationLevel,
+  getNodeStatus,
+} from "@/src-mco2/lib/server_methods";
 
 import { case1, case2, case3 } from "@/src-mco2/actions/conc_cases";
+import {
+  failCase1,
+  failCase2,
+  failCase3,
+  failCase4,
+} from "@/src-mco2/actions/fail_cases";
 import { db0, db1, db2 } from "@/src-mco2/db";
 import { cn } from "@/src-mco2/utils/cn";
 
@@ -25,52 +34,114 @@ export default async function Home() {
     <div className="flex min-h-screen items-center justify-center font-sans">
       <main className="flex min-h-screen w-full max-w-4xl flex-col space-y-20 items-center py-32 px-16 sm:items-start">
         <div className="flex space-x-2 w-full items-start mb-12">
-          <Link href="/node0" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+          <Link
+            href="/node0"
+            className="hover:border-white border-transparent border-b-1 transition-colors duration-200"
+          >
             <NodeStatus name="Node 0" online={node0_status} />
           </Link>
-          <Link href="/node1" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+          <Link
+            href="/node1"
+            className="hover:border-white border-transparent border-b-1 transition-colors duration-200"
+          >
             <NodeStatus name="Node 1" online={node1_status} />
           </Link>
-          <Link href="/node2" className="hover:border-white border-transparent border-b-1 transition-colors duration-200">
+          <Link
+            href="/node2"
+            className="hover:border-white border-transparent border-b-1 transition-colors duration-200"
+          >
             <NodeStatus name="Node 2" online={node2_status} />
           </Link>
-          <p className="glow-white">Current Isolation Level: <span className={cn(isolation == "UNKNOWN" ? "text-red-500" : "text-green-500", "[text-shadow:none]")}>{isolation}</span></p>
+          <p className="glow-white">
+            Current Isolation Level:{" "}
+            <span
+              className={cn(
+                isolation == "UNKNOWN" ? "text-red-500" : "text-green-500",
+                "[text-shadow:none]"
+              )}
+            >
+              {isolation}
+            </span>
+          </p>
         </div>
 
         <div className="w-full">
-            <h1 className="font-semibold text-2xl glow-white mb-6">Database Management</h1>
-            <InsertMovieForm />
-            <ReportsPanel />
+          <h1 className="font-semibold text-2xl glow-white mb-6">
+            Database Management
+          </h1>
+          <InsertMovieForm />
+          <ReportsPanel />
         </div>
 
         <div className="">
-          <h1 className="font-semibold text-xl glow-white">Concurrency Control and Consistency</h1>
+          <h1 className="font-semibold text-xl glow-white">
+            Concurrency Control and Consistency
+          </h1>
           <ul className="list-disc list-inside space-y-4 text-gray-500">
-            <li>Case #1: Concurrent transactions in two or more nodes are reading the same data item</li>
+            <li>
+              Case #1: Concurrent transactions in two or more nodes are reading
+              the same data item
+            </li>
             <SimulateForm actionFn={case1} />
-            <li>Case #2: At least one transaction in the three nodes is updating and the other concurrent transactions are reading the same data item</li>
-            <SimulateForm actionFn={case2}/>
-            <li>Case #3: Concurrent transactions in two or more nodes are writing (update / delete) the same data item</li>
+            <li>
+              Case #2: At least one transaction in the three nodes is updating
+              and the other concurrent transactions are reading the same data
+              item
+            </li>
+            <SimulateForm actionFn={case2} />
+            <li>
+              Case #3: Concurrent transactions in two or more nodes are writing
+              (update / delete) the same data item
+            </li>
             <SimulateForm actionFn={case3} />
           </ul>
         </div>
 
         <div className="">
-          <h1 className="font-semibold text-xl glow-white">Global Failure Recovery</h1>
+          <h1 className="font-semibold text-xl glow-white">
+            Global Failure Recovery
+          </h1>
           <ul className="list-disc list-inside space-y-2 text-gray-500">
-            <li>Case #1: When attempting to replicate the transaction from Node 2 or Node 3 to the central node, the transaction fails in writing (insert / update) to the central node</li>
-            <li>Case #2: The central node eventually recovers from failure (i.e., comes back online) and missed certain write (insert / update) transactions</li>
-            <li>Case #3: When attempting to replicate the transaction from central node to either Node 2 or Node 3, the transaction fails in writing (insert / update) to Node 2 or Node 3</li>
-            <li>Case #4: Node 2 or Node 3 is eventually recovers from failure (i.e., comes back online) and missed certain write (insert / update) transactions</li>
+            <li>
+              Case #1: When attempting to replicate the transaction from Node 2
+              or Node 3 to the central node, the transaction fails in writing
+              (insert / update) to the central node
+            </li>
+            <SimulateForm actionFn={failCase1} />
+            <li>
+              Case #2: The central node eventually recovers from failure (i.e.,
+              comes back online) and missed certain write (insert / update)
+              transactions
+            </li>
+            <SimulateForm actionFn={failCase2} />
+            <li>
+              Case #3: When attempting to replicate the transaction from central
+              node to either Node 2 or Node 3, the transaction fails in writing
+              (insert / update) to Node 2 or Node 3
+            </li>
+            <SimulateForm actionFn={failCase3} />
+            <li>
+              Case #4: Node 2 or Node 3 is eventually recovers from failure
+              (i.e., comes back online) and missed certain write (insert /
+              update) transactions
+            </li>
+            <SimulateForm actionFn={failCase4} />
           </ul>
         </div>
       </main>
 
       <div className="fixed bottom-4 right-4 z-50">
         <IsolationChangeBtn
-          currentLevel={isolation as "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE"}
+          currentLevel={
+            isolation as
+              | "READ-UNCOMMITTED"
+              | "READ-COMMITTED"
+              | "REPEATABLE-READ"
+              | "SERIALIZABLE"
+          }
           disable={isolation == "UNKNOWN"}
-          className="bg-black border border-gray-600 border-dashed rounded-md px-4 py-6" />
+          className="bg-black border border-gray-600 border-dashed rounded-md px-4 py-6"
+        />
       </div>
     </div>
   );
