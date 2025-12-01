@@ -3,12 +3,62 @@
 import { revalidatePath } from "next/cache";
 import { RowDataPacket } from "mysql2";
 
-import { execWrite } from "../lib/query";
+import { executeRead, execWrite, NODES } from "../lib/query";
 import { Titles } from "../lib/schema";
 import { db0, db1, db2 } from "../db";
 import { addLog } from "../utils/add_log";
 
-export async function case1() {
+export async function case1(_prevState: { logs: string[] }, formData: FormData): Promise<{ logs: string[] }>  {
+  const tconst = formData.get("tconst") as string;
+  const logs: string[] = [];
+
+  const [rows] = await db0.query("SELECT * FROM node0_titles where tconst = ?", [tconst]) as [Titles[], unknown];
+
+  if (!rows || rows.length === 0) {
+    addLog(logs, `Data item ${tconst} not found on Node 0`);
+    return { logs };
+  }
+
+  addLog(logs, `Starting Read Transaction on Node 0 (10s delay)...`);
+
+  const currentNodeEnv = process.env.NEXT_PUBLIC_CURRENT_NODE || "";
+
+  let localKey: keyof typeof NODES = "NODE0";
+  if (currentNodeEnv.includes("Node 1")) localKey = "NODE1";
+  if (currentNodeEnv.includes("Node 2")) localKey = "NODE2";
+
+  const localResult = await executeRead(localKey, tconst, 10);
+
+  if (localResult.found) {
+    addLog(logs, `(Local Hit) ${localResult.sourceNode}`);
+    addLog(logs, `SUCCESS: Read '${localResult.data?.primaryTitle}' from ${localResult.sourceNode}`);
+    return { logs };
+  }
+
+  if (localKey !== "NODE0") {
+    const centralResult = await executeRead("NODE0", tconst, 10);
+    if (centralResult.found) {
+      addLog(logs, `(Routed to) ${centralResult.sourceNode}`);
+      addLog(logs, `SUCCESS: Read '${centralResult.data?.primaryTitle}' from ${centralResult.sourceNode}`);
+      return { logs };
+    }
+  }
+
+  let peerKey: keyof typeof NODES | null = null;
+  if (localKey === "NODE1") peerKey = "NODE2";
+  if (localKey === "NODE2") peerKey = "NODE1";
+
+  if (peerKey) {
+    const peerResult = await executeRead(peerKey, tconst, 10);
+    if (peerResult.found) {
+      addLog(logs, `(Routed to) ${peerResult.sourceNode}`);
+      addLog(logs, `SUCCESS: Read '${peerResult.data?.primaryTitle}' from ${peerResult.sourceNode}`);
+      return { logs };
+    }
+  }
+
+  revalidatePath("/");
+  return { logs };
 }
 
 export async function case2(_prevState: { logs: string[] }, formData: FormData): Promise<{ logs: string[] }> {

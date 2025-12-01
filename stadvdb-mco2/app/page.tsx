@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { getIsolationLevel, getNodeStatus } from "@/src-mco2/lib/server_methods";
 
-import { case2, case3 } from "@/src-mco2/actions/conc_cases";
+import { case1, case2, case3 } from "@/src-mco2/actions/conc_cases";
 import { db0, db1, db2 } from "@/src-mco2/db";
 import { cn } from "@/src-mco2/utils/cn";
 
@@ -41,6 +41,7 @@ export default async function Home() {
           <h1 className="font-semibold text-xl glow-white">Concurrency Control and Consistency</h1>
           <ul className="list-disc list-inside space-y-4 text-gray-500">
             <li>Case #1: Concurrent transactions in two or more nodes are reading the same data item</li>
+            <SimulateForm actionFn={case1} />
             <li>Case #2: At least one transaction in the three nodes is writing (update / delete) and the other concurrent transactions are reading the same data item</li>
             <SimulateForm actionFn={case2}/>
             <li>Case #3: Concurrent transactions in two or more nodes are writing (update / delete) the same data item</li>
