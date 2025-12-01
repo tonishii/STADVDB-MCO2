@@ -42,7 +42,7 @@ export default async function Home() {
           <ul className="list-disc list-inside space-y-4 text-gray-500">
             <li>Case #1: Concurrent transactions in two or more nodes are reading the same data item</li>
             <SimulateForm actionFn={case1} />
-            <li>Case #2: At least one transaction in the three nodes is writing (update / delete) and the other concurrent transactions are reading the same data item</li>
+            <li>Case #2: At least one transaction in the three nodes is updating and the other concurrent transactions are reading the same data item</li>
             <SimulateForm actionFn={case2}/>
             <li>Case #3: Concurrent transactions in two or more nodes are writing (update / delete) the same data item</li>
             <SimulateForm actionFn={case3} />
@@ -64,7 +64,7 @@ export default async function Home() {
         <IsolationChangeBtn
           currentLevel={isolation as "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE"}
           disable={isolation == "UNKNOWN"}
-          className="border border-gray-600 border-dashed rounded-md px-4 py-6" />
+          className="bg-black border border-gray-600 border-dashed rounded-md px-4 py-6" />
       </div>
     </div>
   );
