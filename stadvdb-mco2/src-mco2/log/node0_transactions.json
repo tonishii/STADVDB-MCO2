@@ -1,0 +1,40 @@
+[
+  {
+    "id": "4981e924-0df9-4dd5-8edf-22263046b152",
+    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
+    "timestamp": "2025-12-01T08:20:07.932Z",
+    "node": "0",
+    "operation": "START",
+    "status": "PENDING"
+  },
+  {
+    "id": "165a3b8f-d1f0-463d-a6ad-05f5d03a9e64",
+    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
+    "timestamp": "2025-12-01T08:20:07.941Z",
+    "node": "0",
+    "operation": "UPDATE",
+    "status": "ABORTED",
+    "values": {
+      "tconst": "tt0000273",
+      "primaryTitle": "Updated Title for Case 2",
+      "startYear": 1900,
+      "runtimeMinutes": 4,
+      "genres": "Action,Crime,Drama"
+    },
+    "oldValues": {
+      "tconst": "tt0000273",
+      "primaryTitle": "Updated Title for Case 2",
+      "startYear": 1900,
+      "runtimeMinutes": 4,
+      "genres": "Action,Crime,Drama"
+    }
+  },
+  {
+    "id": "6f0c3587-883f-463d-8c62-d59ebf122f40",
+    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
+    "timestamp": "2025-12-01T08:20:13.043Z",
+    "node": "0",
+    "operation": "COMMIT",
+    "status": "COMPLETED"
+  }
+]

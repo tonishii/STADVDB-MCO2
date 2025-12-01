@@ -31,7 +31,7 @@ export async function logTransaction(tx: TransactionLogEntry) {
   tx.timestamp = new Date().toISOString();
   transactions.push(tx);
 
-  fs.writeFileSync(filePath, JSON.stringify(transactions));
+  fs.writeFileSync(filePath, JSON.stringify(transactions, null, 2));
 }
 
 export function readNodeLogs(node: number): TransactionLogEntry[] {

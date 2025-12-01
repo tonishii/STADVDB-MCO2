@@ -8,7 +8,8 @@ export async function redo(tx: TransactionLogEntry, pool: Pool) {
     switch (tx.operation) {
       case "INSERT":
         await conn.query(
-          `INSERT INTO ${tableName}(tconst, primaryTitle, startYear, runtimeMinutes, genres) VALUES(?, ?, ?, ?, ?)`,
+          `INSERT INTO ${tableName}(tconst, primaryTitle, startYear, runtimeMinutes, genres) 
+          VALUES(?, ?, ?, ?, ?)`,
           [
             tx.values?.tconst,
             tx.values?.primaryTitle,
@@ -103,7 +104,8 @@ export async function undo(tx: TransactionLogEntry, pool: Pool) {
         break;
       case "DELETE":
         await conn.query(
-          `INSERT INTO ${tableName}(tconst, primaryTitle, startYear, runtimeMinutes, genres) VALUES(?, ?, ?, ?, ?)`,
+          `INSERT INTO ${tableName}(tconst, primaryTitle, startYear, runtimeMinutes, genres) 
+          VALUES(?, ?, ?, ?, ?)`,
           [
             tx.oldValues?.tconst,
             tx.oldValues?.primaryTitle,

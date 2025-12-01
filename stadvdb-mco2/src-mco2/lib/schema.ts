@@ -17,6 +17,7 @@ export interface TransactionLogEntry {
     | "INSERT"
     | "UPDATE"
     | "DELETE"
+    | "READ"
     | "COMMIT"
     | "ABORT"
     | "READY";

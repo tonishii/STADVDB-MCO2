@@ -33,6 +33,7 @@ export async function recoverTransaction(node: number) {
       for (const op of operations) {
         const pool = nodePools[op.node];
         redo(op, pool);
+        console.log("redo");
         op.status = "COMPLETED";
       }
     } else {
@@ -44,12 +45,13 @@ export async function recoverTransaction(node: number) {
       for (const op of operations) {
         const pool = nodePools[op.node];
         undo(op, pool);
+        console.log("undo");
         op.status = "ABORTED";
       }
     }
   }
   fs.writeFileSync(
     path.join(logFilePath, `node${node}_transactions.json`),
-    JSON.stringify(txs)
+    JSON.stringify(txs, null, 2)
   );
 }
