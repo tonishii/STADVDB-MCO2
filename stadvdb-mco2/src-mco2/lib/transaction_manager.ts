@@ -1,3 +1,5 @@
+"use server";
+
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
@@ -35,7 +37,7 @@ export async function logTransaction(tx: TransactionLogEntry) {
   fs.writeFileSync(filePath, JSON.stringify(transactions, null, 2));
 }
 
-export function readNodeLogs(node: number): TransactionLogEntry[] {
+export async function readNodeLogs(node: number): Promise<TransactionLogEntry[]> {
   const filePath = getNodeLogPath(node);
   if (!fs.existsSync(filePath)) return [];
   const data = fs.readFileSync(filePath, "utf-8");

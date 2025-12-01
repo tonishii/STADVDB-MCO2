@@ -1,3 +1,5 @@
+"use server";
+
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
@@ -12,7 +14,7 @@ const nodePools = {
 };
 
 export async function recoverTransaction(node: number) {
-  const txs: TransactionLogEntry[] = readNodeLogs(node);
+  const txs: TransactionLogEntry[] = await readNodeLogs(node);
 
   const txMap = new Map<string, TransactionLogEntry[]>();
   for (const tx of txs) {
