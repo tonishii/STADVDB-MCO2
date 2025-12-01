@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { readTitleWithDelay } from "@/src-mco2/lib/transaction"; 
+import { readTitleWithDelay, updateTitleWithDelay } from "@/src-mco2/actions/node_operations";
+import InsertTitleForm from "./InsertTitleForm"; 
+import ReportsPanel from "./ReportsPanel";
+import { recoverTransaction } from "@/src-mco2/lib/recover_manager";
+import SearchPanel from "./SearchPanel";
 
 interface NodeDashboardProps {
   nodeName: string;
@@ -10,82 +14,156 @@ interface NodeDashboardProps {
 }
 
 export default function NodeDashboard({ nodeName, currentIsolation, headerAction }: NodeDashboardProps) {
+  const [activeTab, setActiveTab] = useState<"tests" | "data" | "reports" | "recovery">("tests");
+  
   const [tconst, setTconst] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const addLog = (msg: string) => setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
 
-  const handleRead = async () => {
+  const handleCase1 = async () => {
     setLoading(true);
-    addLog(`Starting Read Transaction on ${nodeName} (10s delay)...`);
-    
-    try {
-      const result = await readTitleWithDelay(tconst, 10); 
-      
-      if (result.success) {
-        addLog(`SUCCESS: Read '${result.data?.primaryTitle}' from ${result.node}`);
-      } else {
-        addLog(`ERROR: ${result.error}`);
-      }
-    } catch (e) {
-      addLog("System Error");
-    } finally {
-      setLoading(false);
-    }
+    addLog("Running Case 1: Read (10s Delay)...");
+    const res = await readTitleWithDelay(tconst, 10);
+    if(res.success) addLog(`READ SUCCESS: ${res.data.primaryTitle}`);
+    else addLog(`READ ERROR: ${res.error}`);
+    setLoading(false);
+  };
+
+  const handleCase2_3 = async () => {
+    setLoading(true);
+    const newTitle = `Updated ${new Date().getTime()}`;
+    addLog(`Running Case 2/3: Update to '${newTitle}' (10s Delay)...`);
+    const res = await updateTitleWithDelay(tconst, newTitle, 10);
+    res.logs?.forEach(l => addLog(l));
+    setLoading(false);
+  };
+
+  const handleRecovery = async () => {
+    addLog("Starting Recovery Process...");
+    const nodeId = nodeName.includes("Node 1") ? 1 : nodeName.includes("Node 2") ? 2 : 0;
+    await recoverTransaction(nodeId);
+    addLog("Recovery Scan Complete. Check Server Console for details.");
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-10 font-mono">
-      <header className="border-b border-gray-700 pb-5 mb-10 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-900 text-white font-mono">
+      <header className="border-b border-gray-700 bg-gray-800 p-6 flex justify-between items-center sticky top-0 z-10">
         <div>
-            <h1 className="text-3xl font-bold text-blue-400">{nodeName}</h1>
-            <p className="text-gray-400">Distributed Transaction Manager</p>
-            <span className="bg-purple-900 text-purple-200 text-xs px-2 py-1 rounded border border-purple-700">
-                Isolation: {currentIsolation}
-            </span>
+            <h1 className="text-2xl font-bold text-blue-400">{nodeName}</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`w-2 h-2 rounded-full bg-green-500 animate-pulse`}></span>
+              <span className="text-gray-400 text-sm">Online</span>
+              <span className="text-purple-400 text-sm border border-purple-800 px-2 rounded bg-purple-900/30">
+                {currentIsolation}
+              </span>
+            </div>
         </div>
-        
-        <div>
-            {headerAction}
-        </div>
+        <div>{headerAction}</div>
       </header>
 
-      <main className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div className="space-y-6">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <h2 className="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Target Data</h2>
-            <input 
-              value={tconst} 
-              onChange={(e) => setTconst(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-600 p-3 rounded text-lg focus:outline-none focus:border-blue-500"
-              placeholder="Enter Tconst ID"
-            />
-          </div>
+      <nav className="flex border-b border-gray-700 bg-gray-900">
+        {[
+          { id: "tests", label: "Concurrency Tests" },
+          { id: "data", label: "Manage Data" },
+          { id: "reports", label: "Global Reports" },
+          { id: "recovery", label: "Failure Recovery" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-6 py-4 hover:bg-gray-800 transition-colors ${activeTab === tab.id ? "border-b-2 border-blue-500 text-blue-400" : "text-gray-400"}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-             <h2 className="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Actions</h2>
-             <div className="flex flex-col gap-4">
-               <button 
-                 onClick={handleRead}
-                 disabled={loading}
-                 className={`p-4 rounded font-bold text-center transition-colors ${loading ? 'bg-gray-600 cursor-wait' : 'bg-green-600 hover:bg-green-500'}`}
-               >
-                 {loading ? "Transaction In Progress..." : "Case #1: Read (10s Delay)"}
-               </button>
-             </div>
-          </div>
-        </div>
+      <main className="p-8 max-w-7xl mx-auto">
+        
+        {/* concurrency stuff */}
+        {activeTab === "tests" && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                <label className="block text-gray-400 mb-2 text-sm">Target Movie ID (Tconst)</label>
+                <input 
+                  value={tconst} 
+                  onChange={(e) => setTconst(e.target.value)}
+                  className="w-full bg-black border border-gray-600 p-3 rounded text-lg text-white"
+                />
+              </div>
 
-        <div className="bg-black p-6 rounded-lg border border-gray-700 h-[500px] overflow-y-auto font-mono text-sm">
-          <h3 className="text-gray-500 mb-2 uppercase tracking-wider">Transaction Logs</h3>
-          {logs.length === 0 && <p className="text-gray-700 italic">No logs yet...</p>}
-          {logs.map((log, i) => (
-            <div key={i} className="mb-2 border-l-2 border-blue-500 pl-3 py-1 text-gray-300">
-              {log}
+              <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 space-y-4">
+                 <h3 className="text-lg font-bold text-gray-300 border-b border-gray-600 pb-2">Simulation Actions</h3>
+                 
+                 <div className="p-3 bg-blue-900/20 border border-blue-800 rounded">
+                    <h4 className="font-bold text-blue-400">Case #1: Concurrent Read</h4>
+                    <p className="text-xs text-gray-400 mb-2">Reads the row. Sleeps 10s. Doesn't block other readers.</p>
+                    <button onClick={handleCase1} disabled={loading} className="w-full bg-blue-700 hover:bg-blue-600 py-2 rounded text-sm font-bold">
+                        {loading ? "Waiting..." : "Read (10s)"}
+                    </button>
+                 </div>
+
+                 <div className="p-3 bg-orange-900/20 border border-orange-800 rounded">
+                    <h4 className="font-bold text-orange-400">Case #2 & #3: Write Update</h4>
+                    <p className="text-xs text-gray-400 mb-2">Updates row. Sleeps 10s. Blocks reads (Case 2) & writes (Case 3).</p>
+                    <button onClick={handleCase2_3} disabled={loading} className="w-full bg-orange-700 hover:bg-orange-600 py-2 rounded text-sm font-bold">
+                        {loading ? "Waiting..." : "Update (10s)"}
+                    </button>
+                 </div>
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* logs */}
+            <div className="bg-black p-4 rounded-lg border border-gray-700 h-[500px] flex flex-col">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-gray-500 text-sm uppercase">Transaction Logs</h3>
+                <button onClick={() => setLogs([])} className="text-xs text-red-500 hover:text-red-400">Clear</button>
+              </div>
+              <div className="flex-1 overflow-y-auto font-mono text-sm space-y-2">
+                 {logs.map((log, i) => (
+                    <div key={i} className="border-l-2 border-gray-600 pl-2 text-gray-300">
+                        {log}
+                    </div>
+                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* db management */}
+        {activeTab === "data" && (
+            <div className="space-y-8">
+                <InsertTitleForm />
+                <SearchPanel />
+            </div>
+        )}
+
+        {/* reports */}
+        {activeTab === "reports" && (
+            <ReportsPanel />
+        )}
+
+        {/* recovery */}
+        {activeTab === "recovery" && (
+            <div className="bg-gray-800 p-8 rounded border border-gray-700 text-center">
+                <h2 className="text-2xl font-bold text-red-500 mb-4">Node Failure Recovery</h2>
+                <p className="text-gray-300 mb-8 max-w-xl mx-auto">
+                    This triggers the Transaction Log Manager to scan the local JSON logs (`src-mco2/logs`). 
+                    It will identify "Pending" transactions and attempt to REDO (if committed) or UNDO (if aborted) them 
+                    to restore consistency.
+                </p>
+                <button 
+                    onClick={handleRecovery}
+                    className="bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg shadow-red-900/50"
+                >
+                    Run Recovery Manager
+                </button>
+            </div>
+        )}
+
       </main>
     </div>
   );
