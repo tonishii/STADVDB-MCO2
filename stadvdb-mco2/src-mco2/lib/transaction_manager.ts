@@ -23,6 +23,7 @@ export async function createLogFilePath(node: number) {
 }
 
 export async function logTransaction(tx: TransactionLogEntry) {
+  createLogFilePath(Number(tx.node));
   const filePath = getNodeLogPath(Number(tx.node));
 
   const fileContents = fs.readFileSync(filePath, "utf-8");

@@ -1,19 +1,22 @@
 [
   {
-    "id": "4981e924-0df9-4dd5-8edf-22263046b152",
-    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
-    "timestamp": "2025-12-01T08:20:07.932Z",
+    "id": "1150d6e5-71e7-43f6-9ddb-d47118b37f80",
+    "transactionId": "75d35112-0d6f-4c70-a592-a18213d2b4bc",
+    "timestamp": "2025-12-01T09:35:29.654Z",
     "node": "0",
     "operation": "START",
     "status": "PENDING"
   },
   {
-    "id": "165a3b8f-d1f0-463d-a6ad-05f5d03a9e64",
-    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
-    "timestamp": "2025-12-01T08:20:07.941Z",
+    "id": "a6c7e97b-e947-4ecc-b993-d616e995bb04",
+    "transactionId": "75d35112-0d6f-4c70-a592-a18213d2b4bc",
+    "timestamp": "2025-12-01T09:35:29.663Z",
     "node": "0",
     "operation": "UPDATE",
-    "status": "ABORTED",
+    "status": "PENDING",
+    "isReplication": true,
+    "sourceNode": "0",
+    "targetNode": "1",
     "values": {
       "tconst": "tt0000273",
       "primaryTitle": "Updated Title for Case 2",
@@ -30,9 +33,9 @@
     }
   },
   {
-    "id": "6f0c3587-883f-463d-8c62-d59ebf122f40",
-    "transactionId": "048f226a-e5db-4f55-8cb5-082803e7d078",
-    "timestamp": "2025-12-01T08:20:13.043Z",
+    "id": "d9c1ed1b-d0df-4543-a23a-0c582c87effc",
+    "transactionId": "75d35112-0d6f-4c70-a592-a18213d2b4bc",
+    "timestamp": "2025-12-01T09:35:35.009Z",
     "node": "0",
     "operation": "COMMIT",
     "status": "COMPLETED"

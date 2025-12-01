@@ -31,10 +31,20 @@ export async function recoverTransaction(node: number) {
         return ["INSERT", "UPDATE", "DELETE"].includes(t.operation);
       });
       for (const op of operations) {
-        const pool = nodePools[op.node];
-        redo(op, pool);
+        if (op.isReplication && op.targetNode) {
+          const pool = nodePools[op.node];
+          const redoPool = nodePools[op.targetNode];
+          await redo(op, pool);
+          await redo(op, redoPool);
+          op.status = "REPLICATED";
+        } else {
+          const pool = nodePools[op.node];
+          await redo(op, pool);
+          op.status = "COMPLETED";
+        }
+        op.recoveryAction = "REDO";
+
         console.log("redo");
-        op.status = "COMPLETED";
       }
     } else {
       const operations = log
@@ -43,10 +53,19 @@ export async function recoverTransaction(node: number) {
         })
         .reverse();
       for (const op of operations) {
-        const pool = nodePools[op.node];
-        undo(op, pool);
+        if (op.isReplication && op.targetNode) {
+          const pool = nodePools[op.node];
+          const undoPool = nodePools[op.targetNode];
+          await undo(op, undoPool);
+          await undo(op, pool);
+          op.status = "REPLICATED";
+        } else {
+          const pool = nodePools[op.node];
+          await undo(op, pool);
+          op.status = "ABORTED";
+        }
+        op.recoveryAction = "UNDO";
         console.log("undo");
-        op.status = "ABORTED";
       }
     }
   }
