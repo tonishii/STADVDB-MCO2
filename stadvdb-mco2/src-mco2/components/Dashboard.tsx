@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { readTitleWithDelay, updateTitleWithDelay } from "@/src-mco2/actions/node_operations";
+import { readTitleWithDelay, updateAttributeWithDelay } from "@/src-mco2/actions/node_operations";
 import InsertTitleForm from "./InsertTitleForm"; 
 import ReportsPanel from "./ReportsPanel";
 import { recoverTransaction } from "@/src-mco2/lib/recover_manager";
@@ -17,26 +17,41 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
   const [activeTab, setActiveTab] = useState<"tests" | "data" | "reports" | "recovery">("tests");
   
   const [tconst, setTconst] = useState("");
+  const [updateCol, setUpdateCol] = useState<"primaryTitle" | "runtimeMinutes" | "genres">("primaryTitle");
+  const [updateVal, setUpdateVal] = useState("");
+
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const addLog = (msg: string) => setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
 
-  const handleCase1 = async () => {
+  const handleRead = async () => {
     setLoading(true);
-    addLog("Running Case 1: Read (10s Delay)...");
+    addLog(`Running Read on ${tconst} (10s Delay)...`);
     const res = await readTitleWithDelay(tconst, 10);
-    if(res.success) addLog(`READ SUCCESS: ${res.data.primaryTitle}`);
-    else addLog(`READ ERROR: ${res.error}`);
+    if(res.success) {
+        addLog(`READ SUCCESS: Found '${res.data.primaryTitle}'`);
+        addLog(`SOURCE: ${res.node}`);
+    } else {
+        addLog(`READ ERROR: ${res.error}`);
+    }
     setLoading(false);
   };
 
-  const handleCase2_3 = async () => {
+  const handleUpdate = async () => {
+    if(!updateVal) {
+        alert("Please enter a value to update");
+        return;
+    }
     setLoading(true);
-    const newTitle = `Updated ${new Date().getTime()}`;
-    addLog(`Running Case 2/3: Update to '${newTitle}' (10s Delay)...`);
-    const res = await updateTitleWithDelay(tconst, newTitle, 10);
-    res.logs?.forEach(l => addLog(l));
+    addLog(`Running Update on ${tconst} (10s Delay)...`);
+    addLog(`Setting ${updateCol} = '${updateVal}'`);
+
+    const res = await updateAttributeWithDelay(tconst, updateCol, updateVal, 10);
+    
+    if (res.logs) {
+        res.logs.forEach(l => addLog(l));
+    }
     setLoading(false);
   };
 
@@ -101,7 +116,7 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
                  <div className="p-3 bg-blue-900/20 border border-blue-800 rounded">
                     <h4 className="font-bold text-blue-400">Case #1: Concurrent Read</h4>
                     <p className="text-xs text-gray-400 mb-2">Reads the row. Sleeps 10s. Doesn't block other readers.</p>
-                    <button onClick={handleCase1} disabled={loading} className="w-full bg-blue-700 hover:bg-blue-600 py-2 rounded text-sm font-bold">
+                    <button onClick={handleRead} disabled={loading} className="w-full bg-blue-700 hover:bg-blue-600 py-2 rounded text-sm font-bold">
                         {loading ? "Waiting..." : "Read (10s)"}
                     </button>
                  </div>
@@ -109,7 +124,32 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
                  <div className="p-3 bg-orange-900/20 border border-orange-800 rounded">
                     <h4 className="font-bold text-orange-400">Case #2 & #3: Write Update</h4>
                     <p className="text-xs text-gray-400 mb-2">Updates row. Sleeps 10s. Blocks reads (Case 2) & writes (Case 3).</p>
-                    <button onClick={handleCase2_3} disabled={loading} className="w-full bg-orange-700 hover:bg-orange-600 py-2 rounded text-sm font-bold">
+
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <div className="col-span-1">
+                          <label className="text-xs text-gray-500 block mb-1">Attribute</label>
+                          <select 
+                              value={updateCol}
+                              onChange={(e) => setUpdateCol(e.target.value as any)}
+                              className="w-full bg-black border border-gray-600 p-2 rounded text-sm"
+                          >
+                              <option value="primaryTitle">Title</option>
+                              <option value="runtimeMinutes">Runtime</option>
+                              <option value="genres">Genres</option>
+                          </select>
+                      </div>
+                      <div className="col-span-2">
+                          <label className="text-xs text-gray-500 block mb-1">New Value</label>
+                          <input 
+                              value={updateVal}
+                              onChange={(e) => setUpdateVal(e.target.value)}
+                              className="w-full bg-black border border-gray-600 p-2 rounded text-sm"
+                              placeholder="Enter new value..."
+                          />
+                      </div>
+                    </div>
+
+                    <button onClick={handleUpdate} disabled={loading} className="w-full bg-orange-700 hover:bg-orange-600 py-2 rounded text-sm font-bold">
                         {loading ? "Waiting..." : "Update (10s)"}
                     </button>
                  </div>
@@ -151,7 +191,7 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
             <div className="bg-gray-800 p-8 rounded border border-gray-700 text-center">
                 <h2 className="text-2xl font-bold text-red-500 mb-4">Node Failure Recovery</h2>
                 <p className="text-gray-300 mb-8 max-w-xl mx-auto">
-                    This triggers the Transaction Log Manager to scan the local JSON logs (`src-mco2/logs`). 
+                    This triggers the Transaction Log Manager to scan the local JSON logs. 
                     It will identify "Pending" transactions and attempt to REDO (if committed) or UNDO (if aborted) them 
                     to restore consistency.
                 </p>
