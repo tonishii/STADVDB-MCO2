@@ -2,23 +2,7 @@
 
 import { db0, db1, db2 } from "../db";
 import { RowDataPacket } from "mysql2";
-
-export type ReportData = {
-  consistency: {
-    node0Count: number;
-    node1Count: number;
-    node2Count: number;
-    isConsistent: boolean;
-  };
-  distribution: {
-    node1Pct: string;
-    node2Pct: string;
-  };
-  genres: {
-    node1Top: { genre: string; count: number }[];
-    node2Top: { genre: string; count: number }[];
-  };
-};
+import { ReportData } from "../lib/schema";
 
 export async function generateReports(): Promise<ReportData> {
   const [r0] = await db0.query("SELECT COUNT(*) as c FROM node0_titles") as [RowDataPacket[], unknown];

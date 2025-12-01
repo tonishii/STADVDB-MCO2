@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { generateReports, ReportData } from "../actions/generate_reports";
+import { generateReports } from "../actions/generate_reports";
+import { ReportData } from "../lib/schema";
 
 export default function ReportsPanel() {
   const [data, setData] = useState<ReportData | null>(null);

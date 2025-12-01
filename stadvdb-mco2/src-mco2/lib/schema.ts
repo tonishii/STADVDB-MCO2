@@ -33,3 +33,20 @@ export interface TransactionLogEntry {
 
   recoveryAction?: "UNDO" | "REDO";
 }
+
+export type ReportData = {
+  consistency: {
+    node0Count: number;
+    node1Count: number;
+    node2Count: number;
+    isConsistent: boolean;
+  };
+  distribution: {
+    node1Pct: string;
+    node2Pct: string;
+  };
+  genres: {
+    node1Top: { genre: string; count: number }[];
+    node2Top: { genre: string; count: number }[];
+  };
+};
