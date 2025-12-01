@@ -15,8 +15,7 @@ const DB_CONFIG = {
 };
 
 async function runTest() {
-    console.log("🚑 STARTING TC-05: NODE 2 FAILURE WRITE TEST");
-    console.log("   (Make sure Node 2 is OFF for this test)");
+    console.log("TC-05: NODE 2 FAILURE WRITE TEST");
 
     const pool = mysql.createPool(DB_CONFIG);
 
@@ -24,14 +23,14 @@ async function runTest() {
         console.log(`[ATTEMPT] Writing 'Crash Test Movie' to Central Node...`);
         const [result] = await pool.query(
             "INSERT INTO node0_titles (tconst, primaryTitle, startYear) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE primaryTitle = VALUES(primaryTitle)",
-            ['tt_crash_TC05', 'Crash Test TC-05', 1970]
+            ['TC05', 'TC-05', 1970]
         );
 
-        console.log("   ✅ PASS: Central Node accepted the write.");
-        console.log("   Interpretation: System handled the partial failure gracefully.");
+        console.log("   PASS: Central Node accepted the write.");
+        console.log("   Interpretation: System handled the partial failure");
 
     } catch (err) {
-        console.error("   ❌ FAIL:", err.message);
+        console.error("   FAIL:", err.message);
     } finally {
         await pool.end();
     }
