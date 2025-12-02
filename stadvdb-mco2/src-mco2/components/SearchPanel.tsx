@@ -9,12 +9,14 @@ export default function SearchPanel() {
   const [rows, setRows] = useState<Titles[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedNode, setSelectedNode] = useState("");
+  const [searchedNode, setSearchedNode] = useState("");
 
   const handleSearch = async (formData: FormData) => {
     setLoading(true);
     const result = await searchTitles(formData);
     if (result.success) {
       setRows(result.data);
+      setSearchedNode(formData.get("targetNode") as string);
     }
     setLoading(false);
   };
@@ -86,7 +88,7 @@ export default function SearchPanel() {
       </form>
 
       {rows.length > 0 ? (
-        <TitlesTable rows={rows} title={`Search Results (${rows.length}) in ${getNodeName(selectedNode)}`} />
+        <TitlesTable rows={rows} title={`Search Results (${rows.length}) in ${getNodeName(searchedNode)}`} />
       ) : (
         <div className="text-gray-500 italic text-center py-10 border border-dashed border-gray-800 rounded">
             No results found or no search performed.
