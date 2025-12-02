@@ -19,6 +19,7 @@ function groupLogs(rows: TransactionLogEntry[]) {
 
 export default function LogsTable({ rows }: LogTableProps) {
   const groupedLogs = groupLogs(rows);
+  console.log(rows);
   return (
     <div className="overflow-x-auto rounded-xl border border-neutral-700">
       <div className="max-h-96 overflow-y-auto overflow-x-hidden">
@@ -100,9 +101,10 @@ export default function LogsTable({ rows }: LogTableProps) {
               })
             ) : (
               <tr>
-                <td colSpan={6} className="text-center px-4 py-2 text-gray-500">
-                  No Logs
-                </td>
+                <td
+                  colSpan={6}
+                  className="text-center px-4 py-2 text-gray-500"
+                ></td>
               </tr>
             )}
           </tbody>
