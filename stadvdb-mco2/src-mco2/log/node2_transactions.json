@@ -1,0 +1,55 @@
+[
+  {
+    "id": "21f518a9-66d1-4515-8a0c-9f703f73e2b3",
+    "transactionId": "9f682f62-d724-409c-abf6-1bdfbd641bd9",
+    "timestamp": "2025-12-02T09:27:14.956Z",
+    "node": "2",
+    "operation": "UPDATE",
+    "isReplication": true,
+    "sourceNode": "2",
+    "targetNode": "0",
+    "values": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Missng Links 2"
+    },
+    "oldValues": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Missing Links",
+      "startYear": 1916,
+      "runtimeMinutes": 50,
+      "genres": "Mystery"
+    },
+    "status": "REPLICATED",
+    "recoveryAction": "REDO"
+  },
+  {
+    "id": "dabdd571-56b9-4214-ac61-538138cc8bd7",
+    "transactionId": "a86fad43-621e-4ff1-9d90-2e3662623975",
+    "timestamp": "2025-12-02T09:27:24.596Z",
+    "node": "2",
+    "operation": "START"
+  },
+  {
+    "id": "dc702e8f-7cca-4d6b-8424-96f9a45fe4f9",
+    "transactionId": "a86fad43-621e-4ff1-9d90-2e3662623975",
+    "timestamp": "2025-12-02T09:27:24.596Z",
+    "node": "2",
+    "operation": "UPDATE",
+    "isReplication": true,
+    "sourceNode": "2",
+    "targetNode": "0",
+    "values": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Mising Links 2"
+    },
+    "oldValues": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Missing Links",
+      "startYear": 1916,
+      "runtimeMinutes": 50,
+      "genres": "Mystery"
+    },
+    "status": "REPLICATED",
+    "recoveryAction": "REDO"
+  }
+]

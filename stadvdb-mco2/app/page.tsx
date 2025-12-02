@@ -8,12 +8,6 @@ import {
 } from "@/src-mco2/lib/server_methods";
 
 import { case1, case2, case3 } from "@/src-mco2/actions/conc_cases";
-import {
-  failCase1,
-  failCase2,
-  failCase3,
-  failCase4,
-} from "@/src-mco2/actions/fail_cases";
 import { db0, db1, db2 } from "@/src-mco2/db";
 import { cn } from "@/src-mco2/utils/cn";
 
@@ -107,25 +101,21 @@ export default async function Home() {
               or Node 3 to the central node, the transaction fails in writing
               (insert / update) to the central node
             </li>
-            <SimulateForm actionFn={failCase1} />
             <li>
               Case #2: The central node eventually recovers from failure (i.e.,
               comes back online) and missed certain write (insert / update)
               transactions
             </li>
-            <SimulateForm actionFn={failCase2} />
             <li>
               Case #3: When attempting to replicate the transaction from central
               node to either Node 2 or Node 3, the transaction fails in writing
               (insert / update) to Node 2 or Node 3
             </li>
-            <SimulateForm actionFn={failCase3} />
             <li>
               Case #4: Node 2 or Node 3 is eventually recovers from failure
               (i.e., comes back online) and missed certain write (insert /
               update) transactions
             </li>
-            <SimulateForm actionFn={failCase4} />
           </ul>
         </div>
       </main>

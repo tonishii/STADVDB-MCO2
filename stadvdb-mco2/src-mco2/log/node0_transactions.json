@@ -1,0 +1,41 @@
+[
+  {
+    "id": "20db9d92-cedb-4c73-9329-f3dc4b4746e8",
+    "transactionId": "9f682f62-d724-409c-abf6-1bdfbd641bd9",
+    "timestamp": "2025-12-02T09:27:14.784Z",
+    "node": "0",
+    "operation": "START",
+    "status": "COMPLETED"
+  },
+  {
+    "id": "7688480f-24e7-4182-80bc-a619367f660a",
+    "transactionId": "9f682f62-d724-409c-abf6-1bdfbd641bd9",
+    "timestamp": "2025-12-02T09:27:14.955Z",
+    "node": "0",
+    "operation": "UPDATE",
+    "isReplication": false,
+    "sourceNode": "0",
+    "values": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Missng Links 2"
+    },
+    "oldValues": {
+      "tconst": "tt0005754",
+      "primaryTitle": "The Missing Links",
+      "startYear": 1916,
+      "runtimeMinutes": 50,
+      "genres": "Mystery"
+    },
+    "status": "COMPLETED"
+  },
+  {
+    "id": "9c3a9bd6-8aac-4c8d-a0f3-5769cae0ed01",
+    "transactionId": "9f682f62-d724-409c-abf6-1bdfbd641bd9",
+    "timestamp": "2025-12-02T09:27:14.966Z",
+    "node": "0",
+    "operation": "ABORT",
+    "status": "COMPLETED",
+    "isReplication": false,
+    "sourceNode": "0"
+  }
+]

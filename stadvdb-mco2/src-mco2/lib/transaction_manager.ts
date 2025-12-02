@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
+import { fileURLToPath } from "url";
 
 export const logFilePath = path.join(process.cwd(), "/src-mco2/log/");
 
@@ -40,4 +41,17 @@ export function readNodeLogs(node: number): TransactionLogEntry[] {
   if (!fs.existsSync(filePath)) return [];
   const data = fs.readFileSync(filePath, "utf-8");
   return JSON.parse(data);
+}
+
+export async function completeTransaction(transactionId: string, node: string) {
+  const rows = readNodeLogs(Number(node));
+  rows
+    .filter((r) => r.transactionId === transactionId)
+    .forEach((row) => {
+      row.status = "COMPLETED";
+    });
+
+  const filePath = getNodeLogPath(Number(node));
+
+  fs.writeFileSync(filePath, JSON.stringify(rows, null, 2));
 }
