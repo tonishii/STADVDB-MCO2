@@ -8,7 +8,7 @@ import TitlesTable from "./TitlesTable";
 export default function SearchPanel() {
   const [rows, setRows] = useState<Titles[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedNode, setSelectedNode] = useState("NODE0");
+  const [selectedNode, setSelectedNode] = useState("");
 
   const handleSearch = async (formData: FormData) => {
     setLoading(true);
@@ -18,6 +18,15 @@ export default function SearchPanel() {
     }
     setLoading(false);
   };
+
+  const nodeLabels: Record<string, string> = {
+    "": "Node 0 (Central - All)",
+    "NODE0": "Node 0 (Central - All)",
+    "NODE1": "Node 1 (1900-1915)",
+    "NODE2": "Node 2 (1916-1925)",
+  };
+
+  const getNodeName = (node: string) => nodeLabels[node] ?? nodeLabels[""];
 
   return (
     <div className="w-full bg-neutral-900/50 p-6 rounded-xl border border-neutral-800 mt-8">
@@ -32,6 +41,7 @@ export default function SearchPanel() {
               onChange={(e) => setSelectedNode(e.target.value)}
               className="bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none h-10"
             >
+              <option value="">Select a node...</option>
               <option value="NODE0">Node 0 (Central - All)</option>
               <option value="NODE1">Node 1 (1900-1915)</option>
               <option value="NODE2">Node 2 (1916-1925)</option>
@@ -43,7 +53,6 @@ export default function SearchPanel() {
             <input
               name="limit"
               type="number"
-              defaultValue={20}
               min="1"
               className="bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none h-10"
             />
@@ -77,7 +86,7 @@ export default function SearchPanel() {
       </form>
 
       {rows.length > 0 ? (
-        <TitlesTable rows={rows} title={`Search Results (${rows.length})`} />
+        <TitlesTable rows={rows} title={`Search Results (${rows.length}) in ${getNodeName(selectedNode)}`} />
       ) : (
         <div className="text-gray-500 italic text-center py-10 border border-dashed border-gray-800 rounded">
             No results found or no search performed.
