@@ -49,8 +49,6 @@ export default function NodeDashboard({
   const [searchLoading, setSearchLoading] = useState(false);
   const [logsData, setLogsData] = useState<TransactionLogEntry[]>([]);
 
-  // ... existing state and logic ...
-
   let currentNodeId: "0" | "1" | "2" = "0";
 
   if (nodeName.includes("Node 1")) {
@@ -291,6 +289,7 @@ export default function NodeDashboard({
           <div className="grid gap-4">
             <div className="bg-gray-800 p-8 rounded border border-gray-700">
               <LogsTable rows={logsData} />
+              <p>{currentNodeId}</p>
             </div>
             <div className="bg-gray-800 p-8 rounded border border-gray-700 text-center">
               <h2 className="text-2xl font-bold text-red-500 mb-4">
