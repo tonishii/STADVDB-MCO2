@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
-import { logFilePath, readLogs } from "./transaction_logger";
+import { readLogs } from "./transaction_logger";
 import { redo, undo } from "./recovery_operations";
 import { db0, db1, db2 } from "../db";
 
@@ -12,6 +12,8 @@ const nodePools = {
   "1": db1,
   "2": db2,
 };
+
+const logFilePath = path.join(process.cwd(), "src-mco2/logs");
 
 export async function recoverTransaction(node: number) {
   const txs: TransactionLogEntry[] = await readLogs(node);

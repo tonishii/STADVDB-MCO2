@@ -9,7 +9,8 @@ export async function logger(
   oldValues?: TransactionLogEntry["oldValues"],
   isReplication?: boolean,
   sourceNode?: "0" | "1" | "2",
-  targetNode?: "0" | "1" | "2"
+  targetNode?: "0" | "1" | "2",
+  status?: TransactionLogEntry["status"]
 ): Promise<void> {
   const logEntry: TransactionLogEntry = {
     id: crypto.randomUUID(),
@@ -17,7 +18,7 @@ export async function logger(
     timestamp: new Date().toISOString(),
     node,
     operation,
-    status: operation === "COMMIT" ? "COMPLETED" : "PENDING",
+    status,
     isReplication,
     sourceNode,
     targetNode,
