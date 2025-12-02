@@ -20,65 +20,78 @@ export async function recoverTransaction(node: number) {
 
   const txMap = new Map<string, TransactionLogEntry[]>();
   for (const tx of txs) {
-    if (!txMap.has(tx.id)) {
-      txMap.set(tx.id, []);
+    if (!txMap.has(tx.transactionId)) {
+      txMap.set(tx.transactionId, []);
     }
-    txMap.get(tx.id)?.push(tx);
+    txMap.get(tx.transactionId)?.push(tx);
   }
 
-  for (const [key, log] of txMap.entries()) {
-    const committed = log.some(
-      (t) =>
-        (t.operation === "COMMIT" && t.status !== "REPLICATED") ||
-        t.status !== "COMPLETED"
+  for (const [transactionId, logEntries] of txMap.entries()) {
+    const isFinalized = logEntries.some(
+      (t) => t.status === "COMPLETED" || t.status === "ABORTED"
     );
-    if (committed) {
-      const operations = log.filter((t) =>
-        ["INSERT", "UPDATE", "DELETE"].includes(t.operation)
-      );
-      for (const op of operations) {
-        const pool = nodePools[op.node];
-        if (op.isReplication && op.targetNode) {
-          const redoPool = nodePools[op.targetNode];
-          await redo(op, pool, op.node);
-          await redo(op, redoPool, op.targetNode);
-          op.status = "REPLICATED";
-        } else {
-          await redo(op, pool, op.node);
-          op.status = "COMPLETED";
-        }
 
-        op.recoveryAction = "REDO";
-        console.log(`REDO: ${op.operation} on Node ${op.node}`);
+    if (isFinalized) {
+      continue;
+    }
+
+    const hasCommit = logEntries.some((t) => t.operation === "COMMIT");
+    const recoveryAction = hasCommit ? "REDO" : "UNDO";
+
+    const pendingDataOps = logEntries.filter((t) =>
+      ["INSERT", "UPDATE", "DELETE"].includes(t.operation)
+    );
+
+    if (recoveryAction === "REDO") {
+      for (const op of pendingDataOps) {
+        if (!nodePools[op.node]) continue;
+
+        if (op.isReplication && op.targetNode && nodePools[op.targetNode]) {
+          const primaryPool = nodePools[op.node];
+          const targetPool = nodePools[op.targetNode];
+
+          await redo(op, primaryPool, op.node);
+
+          await redo(op, targetPool, op.targetNode);
+
+          op.recoveryAction = "REDO";
+          op.status = "COMPLETED";
+        } else {
+          const primaryPool = nodePools[op.node];
+          await redo(op, primaryPool, op.node);
+
+          op.recoveryAction = "REDO";
+          op.status = "COMPLETED";
+          console.log(`REDO (Local): ${op.operation} on Node ${op.node}`);
+        }
       }
     } else {
-      const operations = log
-        .filter(
-          (t) =>
-            ["INSERT", "UPDATE", "DELETE"].includes(t.operation) &&
-            t.status !== "ABORTED" &&
-            t.status !== "REPLICATED"
-        )
-        .reverse();
+      const reverseDataOps = pendingDataOps.reverse();
 
-      for (const op of operations) {
-        const pool = nodePools[op.node];
+      for (const op of reverseDataOps) {
+        if (!nodePools[op.node]) continue;
 
-        if (op.isReplication && op.targetNode) {
-          const undoPool = nodePools[op.targetNode];
-          await undo(op, undoPool, op.targetNode);
-          await undo(op, pool, op.node);
-          op.status = "REPLICATED";
+        if (op.isReplication && op.targetNode && nodePools[op.targetNode]) {
+          const primaryPool = nodePools[op.node];
+          const targetPool = nodePools[op.targetNode];
+
+          await undo(op, targetPool, op.targetNode);
+
+          await undo(op, primaryPool, op.node);
+
+          op.recoveryAction = "UNDO";
+          op.status = "ABORTED";
         } else {
-          await undo(op, pool, op.node);
+          const primaryPool = nodePools[op.node];
+          await undo(op, primaryPool, op.node);
+
+          op.recoveryAction = "UNDO";
           op.status = "ABORTED";
         }
-
-        op.recoveryAction = "UNDO";
-        console.log(`UNDO: ${op.operation} on Node ${op.node}`);
       }
     }
   }
+
   fs.writeFileSync(
     path.join(logFilePath, `node${node}_transactions.json`),
     JSON.stringify(txs, null, 2)
