@@ -155,22 +155,25 @@ export async function failCase2Write(
 
   addLog(
     logs,
-    `Simulating pre-failure: Log COMMIT for ${transactionId} on Node 0 (Master)`
+    `Simulating pre-failure: Log COMMIT for ${transactionId} on Node ${sourceNode} (Master)`
   );
-  await logger(transactionId, "0", "START");
+  await logger(transactionId, sourceNode, "START");
   await logger(
     transactionId,
-    "0",
+    sourceNode,
     "UPDATE",
     { tconst, primaryTitle: title },
-    oldValues
+    oldValues,
+    true,
+    sourceNode,
+    "0"
   );
-  await logger(transactionId, "0", "COMMIT");
+  await logger(transactionId, sourceNode, "COMMIT");
 
   addLog(logs, `Master Node 0 has recovered. Starting automated recovery...`);
 
   try {
-    await recoverTransaction(0);
+    await recoverTransaction(Number(sourceNode));
     addLog(logs, `Automated Recovery on Node 0 completed.`);
 
     const [updatedRows] = (await db0.query(
@@ -307,9 +310,11 @@ export async function failCase4Write(
 
   addLog(
     logs,
-    `Simulating pre-failure: Log UPDATE instruction on Slave Node ${targetNode}`
+    `Simulating pre-failure: Log COMMIT for distributed transaction on Master Log (Node 0)`
   );
-  await logger(transactionId, targetNode, "START");
+
+  await logger(transactionId, "0", "START");
+
   await logUpdate(
     transactionId,
     targetNode,
@@ -320,14 +325,16 @@ export async function failCase4Write(
     "0"
   );
 
+  await logger(transactionId, "0", "COMMIT");
+
   addLog(
     logs,
-    `Slave Node ${targetNode} has recovered. Starting automated recovery...`
+    `Slave Node ${targetNode} recovers. Master Node 0 starting automated recovery...`
   );
 
   try {
-    await recoverTransaction(Number(targetNode));
-    addLog(logs, `Automated Recovery on Node ${targetNode} completed.`);
+    await recoverTransaction(0);
+    addLog(logs, `Automated Recovery on Master Node 0 completed.`);
 
     const db = targetNode === "1" ? db1 : db2;
     const table = targetNode === "1" ? "node1_titles" : "node2_titles";
