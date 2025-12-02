@@ -63,7 +63,11 @@ export default function NodeDashboard({
   };
 
   useEffect(() => {
-    fetchLogs();
+    const startupRoutine = async () => {
+      await recoverTransaction(Number(currentNodeId));
+      await fetchLogs();
+    };
+    startupRoutine();
   }, [currentNodeId]);
 
   const addLog = (msg: string) =>
@@ -80,6 +84,7 @@ export default function NodeDashboard({
       addLog(`READ ERROR: ${res.error}`);
     }
     setLoading(false);
+    fetchLogs();
   };
 
   const handleUpdate = async () => {
@@ -102,6 +107,7 @@ export default function NodeDashboard({
       res.logs.forEach((l) => addLog(l));
     }
     setLoading(false);
+    fetchLogs();
   };
 
   const handleSearch = async (formData: FormData) => {
@@ -109,6 +115,7 @@ export default function NodeDashboard({
     const res = await searchTitles(formData);
     if (res.success) setSearchResults(res.data);
     setSearchLoading(false);
+    fetchLogs();
   };
 
   const handleRecovery = async () => {
@@ -120,6 +127,7 @@ export default function NodeDashboard({
       : 0;
     await recoverTransaction(nodeId);
     addLog("Recovery Scan Complete. Check Server Console for details.");
+    fetchLogs();
   };
 
   return (
