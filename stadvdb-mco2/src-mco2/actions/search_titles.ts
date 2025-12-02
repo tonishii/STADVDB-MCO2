@@ -14,6 +14,9 @@ export async function searchTitles(formData: FormData) {
   const title = formData.get("title") as string;
   const targetNodeKey = formData.get("targetNode") as keyof typeof NODES || "NODE0";
 
+  const limitInput = formData.get("limit");
+  const limit = limitInput ? parseInt(limitInput as string) : 20;
+
   const { pool, tableName } = NODES[targetNodeKey];
 
   let query = `SELECT * FROM ${tableName}`;
@@ -32,11 +35,10 @@ export async function searchTitles(formData: FormData) {
 
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
-  } else {
-    query += " ORDER BY startYear DESC"; 
   }
 
-  query += " LIMIT 20";
+  query += " ORDER BY startYear ASC"; 
+  query += ` LIMIT ${limit}`;
 
   try {
     const [rows] = await pool.query(query, params) as [Titles[], any];
