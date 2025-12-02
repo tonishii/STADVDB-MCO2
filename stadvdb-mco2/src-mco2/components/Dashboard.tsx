@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { readTitleWithDelay, updateAttributeWithDelay } from "@/src-mco2/actions/node_operations";
+import { searchTitles } from "@/src-mco2/actions/search_titles";
 import InsertTitleForm from "./InsertTitleForm"; 
 import ReportsPanel from "./ReportsPanel";
 import { recoverTransaction } from "@/src-mco2/lib/recover_manager";
@@ -22,6 +23,9 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
 
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const addLog = (msg: string) => setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
 
@@ -54,6 +58,13 @@ export default function NodeDashboard({ nodeName, currentIsolation, headerAction
     }
     setLoading(false);
   };
+
+  const handleSearch = async (formData: FormData) => {
+    setSearchLoading(true);
+    const res = await searchTitles(formData);
+    if(res.success) setSearchResults(res.data);
+    setSearchLoading(false);
+  }
 
   const handleRecovery = async () => {
     addLog("Starting Recovery Process...");
