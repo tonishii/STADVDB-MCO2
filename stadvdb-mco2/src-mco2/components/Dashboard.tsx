@@ -57,12 +57,12 @@ export default function NodeDashboard({
     currentNodeId = "2";
   }
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      const logs = await readLogs(currentNodeId);
-      setLogsData(logs);
-    };
+  const fetchLogs = async () => {
+    const logs = await readLogs(currentNodeId);
+    setLogsData(logs);
+  };
 
+  useEffect(() => {
     fetchLogs();
   }, [currentNodeId]);
 
@@ -288,6 +288,12 @@ export default function NodeDashboard({
         {activeTab === "recovery" && (
           <div className="grid gap-4">
             <div className="bg-gray-800 p-8 rounded border border-gray-700">
+              <button
+                onClick={fetchLogs}
+                className="bg-blue-700 hover:bg-blue-500 rounded-2xl py-2 px-3 transition-colors mb-3"
+              >
+                Refresh Logs
+              </button>
               <LogsTable rows={logsData} />
             </div>
             <div className="bg-gray-800 p-8 rounded border border-gray-700 text-center">

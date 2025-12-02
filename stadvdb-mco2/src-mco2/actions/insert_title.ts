@@ -5,6 +5,7 @@ import { db0, db1, db2 } from "../db";
 import { addLog } from "../utils/add_log";
 import { logger } from "../utils/add_log_transaction";
 import { Titles } from "../lib/schema";
+import { completeTransaction } from "../lib/transaction_logger";
 
 export async function insertTitle(
   _prevState: { logs: string[] },
@@ -25,10 +26,13 @@ export async function insertTitle(
     primaryTitle,
     startYear,
     runtimeMinutes,
-    genres
+    genres,
   };
 
-  addLog(logs, `Request received: Insert '${primaryTitle}' (${startYear}). Generated ID: ${tconst}`);
+  addLog(
+    logs,
+    `Request received: Insert '${primaryTitle}' (${startYear}). Generated ID: ${tconst}`
+  );
 
   let targetNodePool = null;
   let targetTableName = "";
@@ -38,14 +42,23 @@ export async function insertTitle(
     targetNodePool = db1;
     targetTableName = "node1_titles";
     targetNodeId = "1";
-    addLog(logs, `Routing Logic: Year ${startYear} belongs to Partition 1 (Node 1).`);
+    addLog(
+      logs,
+      `Routing Logic: Year ${startYear} belongs to Partition 1 (Node 1).`
+    );
   } else if (startYear >= 1916 && startYear <= 1925) {
     targetNodePool = db2;
     targetTableName = "node2_titles";
     targetNodeId = "2";
-    addLog(logs, `Routing Logic: Year ${startYear} belongs to Partition 2 (Node 2).`);
+    addLog(
+      logs,
+      `Routing Logic: Year ${startYear} belongs to Partition 2 (Node 2).`
+    );
   } else {
-    addLog(logs, `ERROR: Year ${startYear} is out of scope for this distributed system (1900-1925).`);
+    addLog(
+      logs,
+      `ERROR: Year ${startYear} is out of scope for this distributed system (1900-1925).`
+    );
     return { logs };
   }
 
@@ -70,11 +83,29 @@ export async function insertTitle(
 
     addLog(logs, `Writing to Central Node (Node 0)...`);
     await c0.query(insertSQL("node0_titles"), params);
-    await logger(transactionId, "0", "INSERT", newTitle, undefined, true, targetNodeId, "0");
+    await logger(
+      transactionId,
+      "0",
+      "INSERT",
+      newTitle,
+      undefined,
+      true,
+      targetNodeId,
+      "0"
+    );
 
     addLog(logs, `Writing to Partition Node (Node ${targetNodeId})...`);
     await cTarget.query(insertSQL(targetTableName), params);
-    await logger(transactionId, targetNodeId, "INSERT", newTitle, undefined, true, "0", targetNodeId);
+    await logger(
+      transactionId,
+      targetNodeId,
+      "INSERT",
+      newTitle,
+      undefined,
+      true,
+      "0",
+      targetNodeId
+    );
 
     addLog(logs, `Committing transaction across nodes...`);
     await Promise.all([
@@ -82,10 +113,11 @@ export async function insertTitle(
       cTarget.query("COMMIT"),
       logger(transactionId, "0", "COMMIT"),
       logger(transactionId, targetNodeId, "COMMIT"),
+      completeTransaction(transactionId, targetNodeId),
+      completeTransaction(transactionId, "0"),
     ]);
 
     addLog(logs, `SUCCESS: Title inserted successfully.`);
-
   } catch (error: any) {
     addLog(logs, `ERROR: ${error.message}`);
     addLog(logs, `Rolling back transaction...`);
@@ -93,8 +125,14 @@ export async function insertTitle(
       c0.query("ROLLBACK"),
       cTarget.query("ROLLBACK"),
       logger(transactionId, "0", "ABORT"),
-      targetNodeId ? logger(transactionId, targetNodeId, "ABORT") : Promise.resolve(),
+      targetNodeId
+        ? Promise.all([
+            logger(transactionId, targetNodeId, "ABORT"),
+            completeTransaction(transactionId, targetNodeId),
+          ])
+        : Promise.resolve(),
     ]);
+    completeTransaction(transactionId, "0");
   } finally {
     c0.release();
     cTarget.release();
