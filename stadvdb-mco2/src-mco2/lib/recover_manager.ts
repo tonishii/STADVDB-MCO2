@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
-import { readLogs } from "./transaction_logger";
+import { readLogs, completeTransaction } from "./transaction_logger";
 import { redo, undo } from "./recovery_operations";
 import { db0, db1, db2 } from "../db";
 
@@ -62,8 +62,16 @@ export async function recoverTransaction(node: number) {
 
           op.recoveryAction = "REDO";
           op.status = "COMPLETED";
-          console.log(`REDO (Local): ${op.operation} on Node ${op.node}`);
         }
+      }
+      const startLog = logEntries.find((t) => t.operation === "START");
+      const commitLog = logEntries.find((t) => t.operation === "COMMIT");
+
+      if (startLog) {
+        startLog.status = "COMPLETED";
+      }
+      if (commitLog) {
+        commitLog.status = "COMPLETED";
       }
     } else {
       const reverseDataOps = pendingDataOps.reverse();
@@ -88,6 +96,15 @@ export async function recoverTransaction(node: number) {
           op.recoveryAction = "UNDO";
           op.status = "ABORTED";
         }
+      }
+      const startLog = logEntries.find((t) => t.operation === "START");
+      const abortLog = logEntries.find((t) => t.operation === "ABORT");
+
+      if (startLog) {
+        startLog.status = "ABORTED";
+      }
+      if (abortLog) {
+        abortLog.status = "ABORTED";
       }
     }
   }
