@@ -5,7 +5,6 @@ import {
   readTitleWithDelay,
   updateAttributeWithDelay,
 } from "@/src-mco2/actions/node_operations";
-import { searchTitles } from "@/src-mco2/actions/search_titles";
 import InsertTitleForm from "./InsertTitleForm";
 import ReportsPanel from "./ReportsPanel";
 import { recoverTransaction } from "@/src-mco2/lib/recover_manager";
@@ -45,8 +44,6 @@ export default function NodeDashboard({
   const [logs, setLogs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [logsData, setLogsData] = useState<TransactionLogEntry[]>([]);
 
   let currentNodeId: "0" | "1" | "2" = "0";
@@ -77,12 +74,14 @@ export default function NodeDashboard({
     setLoading(true);
     addLog(`Running Read on ${tconst} (10s Delay)...`);
     const res = await readTitleWithDelay(tconst, 10);
-    if (res.success) {
+
+    if (res.success && res.data) {
       addLog(`READ SUCCESS: Found '${res.data.primaryTitle}'`);
       addLog(`SOURCE: ${res.node}`);
     } else {
       addLog(`READ ERROR: ${res.error}`);
     }
+
     setLoading(false);
     fetchLogs();
   };
@@ -107,14 +106,6 @@ export default function NodeDashboard({
       res.logs.forEach((l) => addLog(l));
     }
     setLoading(false);
-    fetchLogs();
-  };
-
-  const handleSearch = async (formData: FormData) => {
-    setSearchLoading(true);
-    const res = await searchTitles(formData);
-    if (res.success) setSearchResults(res.data);
-    setSearchLoading(false);
     fetchLogs();
   };
 
@@ -157,7 +148,7 @@ export default function NodeDashboard({
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => setActiveTab(tab.id as "tests" | "data" | "reports" | "recovery")}
             className={`px-6 py-4 hover:bg-gray-800 transition-colors ${
               activeTab === tab.id
                 ? "border-b-2 border-blue-500 text-blue-400"
@@ -195,7 +186,7 @@ export default function NodeDashboard({
                     Case #1: Concurrent Read
                   </h4>
                   <p className="text-xs text-gray-400 mb-2">
-                    Reads the row. Sleeps 10s. Doesn't block other readers.
+                    Reads the row. Sleeps 10s. Doesn&apos;t block other readers.
                   </p>
                   <button
                     onClick={handleRead}
@@ -222,7 +213,7 @@ export default function NodeDashboard({
                       </label>
                       <select
                         value={updateCol}
-                        onChange={(e) => setUpdateCol(e.target.value as any)}
+                        onChange={(e) => setUpdateCol(e.target.value as "primaryTitle" | "runtimeMinutes" | "genres")}
                         className="w-full bg-black border border-gray-600 p-2 rounded text-sm"
                       >
                         <option value="primaryTitle">Title</option>
@@ -310,7 +301,7 @@ export default function NodeDashboard({
               </h2>
               <p className="text-gray-300 mb-8 max-w-xl mx-auto">
                 This triggers the Transaction Log Manager to scan the local JSON
-                logs. It will identify "Pending" transactions and attempt to
+                logs. It will identify &quot;Pending&quot; transactions and attempt to
                 REDO (if committed) or UNDO (if aborted) them to restore
                 consistency.
               </p>

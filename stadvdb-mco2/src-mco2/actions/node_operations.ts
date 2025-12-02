@@ -1,6 +1,7 @@
 "use server";
 
 import { db0, db1, db2 } from "../db";
+import { Titles } from "../lib/schema";
 import { getIsolationLevel } from "../lib/server_methods";
 import { logTransaction } from "../lib/transaction_logger";
 import { completeTransaction } from "../lib/transaction_logger";
@@ -59,7 +60,7 @@ export async function readTitleWithDelay(tconst: string, delaySeconds: number) {
       const [rows] = (await conn.query(
         `SELECT *, SLEEP(?) as delay FROM ${tableName} WHERE tconst = ?`,
         [delaySeconds, tconst]
-      )) as [any[], any];
+      )) as [Titles[], unknown];
 
       await conn.query("COMMIT");
 
@@ -76,9 +77,9 @@ export async function readTitleWithDelay(tconst: string, delaySeconds: number) {
           node: `${locationTag} ${name}`,
         };
       }
-    } catch (e: any) {
+    } catch (err) {
       if (conn) await conn.query("ROLLBACK");
-      console.error(`Read failed on ${name}:`, e.message);
+      console.error(`Read failed on ${name}:`, err);
     } finally {
       if (conn) conn.release();
     }
@@ -106,7 +107,7 @@ export async function updateAttributeWithDelay(
   const [rows] = (await db0.query(
     "SELECT * FROM node0_titles WHERE tconst = ?",
     [tconst]
-  )) as [any[], any];
+  )) as [Titles[], unknown];
 
   if (rows.length === 0)
     return { success: false, logs: ["Item not found in Central Directory"] };
@@ -130,7 +131,7 @@ export async function updateAttributeWithDelay(
       id: crypto.randomUUID(),
       transactionId: txId,
       timestamp: new Date().toISOString(),
-      node: currentNode as any,
+      node: currentNode,
       operation: "START",
     });
 
@@ -157,7 +158,7 @@ export async function updateAttributeWithDelay(
       id: crypto.randomUUID(),
       transactionId: txId,
       timestamp: new Date().toISOString(),
-      node: currentNode as any,
+      node: currentNode,
       operation: "UPDATE",
       values: { tconst, [column]: newValue },
     });
@@ -169,14 +170,14 @@ export async function updateAttributeWithDelay(
       id: crypto.randomUUID(),
       transactionId: txId,
       timestamp: new Date().toISOString(),
-      node: currentNode as any,
+      node: currentNode,
       operation: "COMMIT",
     });
     await completeTransaction(txId, currentNode);
 
     logs.push(`SUCCESS: Updated ${column} to '${newValue}'`);
     return { success: true, logs };
-  } catch (err: any) {
+  } catch (err) {
     await cCentral.query("ROLLBACK");
     await cPartition.query("ROLLBACK");
 
@@ -184,12 +185,12 @@ export async function updateAttributeWithDelay(
       id: crypto.randomUUID(),
       transactionId: txId,
       timestamp: new Date().toISOString(),
-      node: currentNode as any,
+      node: currentNode,
       operation: "ABORT",
     });
     await completeTransaction(txId, currentNode);
 
-    return { success: false, logs: [...logs, `ERROR: ${err.message}`] };
+    return { success: false, logs: [...logs, `ERROR: ${err}`] };
   } finally {
     cCentral.release();
     cPartition.release();

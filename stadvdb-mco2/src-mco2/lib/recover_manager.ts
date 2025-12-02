@@ -26,7 +26,7 @@ export async function recoverTransaction(node: number) {
     txMap.get(tx.transactionId)?.push(tx);
   }
 
-  for (const [transactionId, logEntries] of txMap.entries()) {
+  for (const [, logEntries] of txMap.entries()) {
     const isFinalized = logEntries.some(
       (t) => t.status === "COMPLETED" || t.status === "ABORTED"
     );

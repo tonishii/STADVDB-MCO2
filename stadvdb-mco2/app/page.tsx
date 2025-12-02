@@ -8,12 +8,12 @@ export default async function Page() {
   const isolationLevel = await getIsolationLevel();
 
   return (
-    <NodeDashboard 
+    <NodeDashboard
       nodeName={nodeName}
       currentIsolation={isolationLevel}
       headerAction={
-        <IsolationChangeBtn 
-          currentLevel={isolation as any} 
+        <IsolationChangeBtn
+          currentLevel={isolation as "READ-UNCOMMITTED" | "READ-COMMITTED" | "REPEATABLE-READ" | "SERIALIZABLE"}
           className="border border-gray-600 border-dashed rounded-md p-2"
         />
       }

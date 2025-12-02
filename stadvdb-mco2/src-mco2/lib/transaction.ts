@@ -2,6 +2,7 @@
 
 import { db0, db1, db2 } from "../db";
 import { getIsolationLevel } from "../lib/server_methods";
+import { Titles } from "./schema";
 
 const NODES = {
   "NODE0": { pool: db0, tableName: "node0_titles", name: "Node 0 (Central)" },
@@ -10,24 +11,24 @@ const NODES = {
 };
 
 async function executeRead(
-  nodeKey: keyof typeof NODES, 
-  tconst: string, 
+  nodeKey: keyof typeof NODES,
+  tconst: string,
   delaySeconds: number,
   isolation: string
 ) {
   const { pool, tableName, name } = NODES[nodeKey];
   let conn;
-  
+
   try {
     conn = await pool.getConnection();
-    
+
     await conn.query(`SET SESSION TRANSACTION ISOLATION LEVEL ${isolation.replace('-', ' ')}`);
     await conn.query("START TRANSACTION");
 
     const [rows] = await conn.query(
-      `SELECT *, SLEEP(?) as delay FROM ${tableName} WHERE tconst = ?`, 
+      `SELECT *, SLEEP(?) as delay FROM ${tableName} WHERE tconst = ?`,
       [delaySeconds, tconst]
-    ) as [any[], any];
+    ) as [Titles[], unknown];
 
     await conn.query("COMMIT");
 
@@ -36,10 +37,10 @@ async function executeRead(
     }
     return { found: false, error: null };
 
-  } catch (err: any) {
+  } catch (err) {
     if (conn) await conn.query("ROLLBACK");
-    console.error(`Error querying ${name}:`, err.message);
-    return { found: false, error: err.message };
+    console.error(`Error querying ${name}:`, err);
+    return { found: false, error: err };
   } finally {
     if (conn) conn.release();
   }
@@ -48,17 +49,17 @@ async function executeRead(
 export async function readTitleWithDelay(tconst: string, delaySeconds: number) {
   const isolation = await getIsolationLevel();
   const currentNodeEnv = process.env.NEXT_PUBLIC_CURRENT_NODE || "";
-  
+
   let localKey: keyof typeof NODES = "NODE0";
   if (currentNodeEnv.includes("Node 1")) localKey = "NODE1";
   if (currentNodeEnv.includes("Node 2")) localKey = "NODE2";
 
   const localResult = await executeRead(localKey, tconst, delaySeconds, isolation);
-  
+
   if (localResult.found) {
     return { success: true, data: localResult.data, node: `(Local Hit) ${localResult.sourceNode}` };
   }
-  
+
   if (localKey !== "NODE0") {
     const centralResult = await executeRead("NODE0", tconst, delaySeconds, isolation);
     if (centralResult.found) {

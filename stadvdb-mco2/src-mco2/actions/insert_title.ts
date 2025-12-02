@@ -118,8 +118,8 @@ export async function insertTitle(
     ]);
 
     addLog(logs, `SUCCESS: Title inserted successfully.`);
-  } catch (error: any) {
-    addLog(logs, `ERROR: ${error.message}`);
+  } catch (error) {
+    addLog(logs, `ERROR: ${error}`);
     addLog(logs, `Rolling back transaction...`);
     await Promise.all([
       c0.query("ROLLBACK"),

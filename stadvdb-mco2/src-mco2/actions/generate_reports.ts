@@ -2,7 +2,7 @@
 
 import { db0, db1, db2 } from "../db";
 import { RowDataPacket } from "mysql2";
-import { ReportData } from "../lib/schema";
+import { ReportData, Titles } from "../lib/schema";
 
 export async function generateReports(): Promise<ReportData> {
   const [r0] = await db0.query("SELECT COUNT(*) as c FROM node0_titles") as [RowDataPacket[], unknown];
@@ -13,18 +13,18 @@ export async function generateReports(): Promise<ReportData> {
   const c1 = r1[0].c;
   const c2 = r2[0].c;
 
-  // Top Genres Query  
+  // Top Genres Query
   const genreQuery = (table: string) => `
-    SELECT genres, COUNT(*) as count 
-    FROM ${table} 
-    WHERE genres IS NOT NULL 
-    GROUP BY genres 
-    ORDER BY count DESC 
+    SELECT genres, COUNT(*) as count
+    FROM ${table}
+    WHERE genres IS NOT NULL
+    GROUP BY genres
+    ORDER BY count DESC
     LIMIT 3
   `;
 
-  const [g1] = await db1.query(genreQuery("node1_titles")) as [RowDataPacket[], unknown];
-  const [g2] = await db2.query(genreQuery("node2_titles")) as [RowDataPacket[], unknown];
+  const [g1] = await db1.query(genreQuery("node1_titles")) as [(Titles & { count: number })[], unknown];
+  const [g2] = await db2.query(genreQuery("node2_titles")) as [(Titles & { count: number })[], unknown];
 
   return {
     consistency: {
@@ -38,8 +38,8 @@ export async function generateReports(): Promise<ReportData> {
       node2Pct: ((c2 / c0) * 100).toFixed(2),
     },
     genres: {
-      node1Top: g1.map((r: any) => ({ genre: r.genres, count: r.count })),
-      node2Top: g2.map((r: any) => ({ genre: r.genres, count: r.count })),
+      node1Top: g1.map((r) => ({ genre: r.genres ?? "", count: r.count })),
+      node2Top: g2.map((r) => ({ genre: r.genres ?? "", count: r.count })),
     }
   };
 }

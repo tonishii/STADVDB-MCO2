@@ -37,11 +37,11 @@ export async function searchTitles(formData: FormData) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
-  query += " ORDER BY startYear ASC"; 
+  query += " ORDER BY startYear ASC";
   query += ` LIMIT ${limit}`;
 
   try {
-    const [rows] = await pool.query(query, params) as [Titles[], any];
+    const [rows] = await pool.query(query, params) as [Titles[], unknown];
     return { success: true, data: rows };
   } catch (error) {
     console.error("Search failed:", error);
