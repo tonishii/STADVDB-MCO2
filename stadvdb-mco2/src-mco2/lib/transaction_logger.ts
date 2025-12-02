@@ -1,17 +1,8 @@
 import fs from "fs";
 import path from "path";
+import { TransactionLogEntry } from "./schema";
 
-export interface TransactionLogEntry {
-  id: string;
-  transactionId: string;
-  timestamp: string;
-  node: "0" | "1" | "2";
-  operation: "START" | "INSERT" | "UPDATE" | "DELETE" | "COMMIT" | "ABORT";
-  targetNode?: "0" | "1" | "2";
-  values?: any;
-}
-
-const logFilePath = path.join(process.cwd(), "src-mco2/logs");
+export const logFilePath = path.join(process.cwd(), "src-mco2/logs");
 
 function ensureDirectory() {
   if (!fs.existsSync(logFilePath)) {
@@ -19,21 +10,42 @@ function ensureDirectory() {
   }
 }
 
-export async function logTransaction(tx: TransactionLogEntry) {
+function getNodeLogPath(node: string | number) {
   ensureDirectory();
-  const file = path.join(logFilePath, `node${tx.node}.json`);
+  return path.join(logFilePath, `node${node}_transactions.json`);
+}
+
+export async function logTransaction(tx: TransactionLogEntry) {
+  const file = getNodeLogPath(tx.node);
   
   let logs: TransactionLogEntry[] = [];
-  if (fs.existsSync(file)) {
-    logs = JSON.parse(fs.readFileSync(file, "utf-8"));
+  
+  try {
+    if (fs.existsSync(file)) {
+      const content = fs.readFileSync(file, "utf-8");
+      if (content.trim()) {
+        logs = JSON.parse(content);
+      }
+    }
+  } catch (err) {
+    console.error("Error reading log file, starting fresh:", err);
+    logs = [];
   }
   
   logs.push(tx);
   fs.writeFileSync(file, JSON.stringify(logs, null, 2));
 }
 
-export async function readLogs(node: string) {
-  const file = path.join(logFilePath, `node${node}.json`);
+export async function readLogs(node: string | number): Promise<TransactionLogEntry[]> {
+  const file = getNodeLogPath(node);
   if (!fs.existsSync(file)) return [];
-  return JSON.parse(fs.readFileSync(file, "utf-8"));
+  
+  try {
+    const content = fs.readFileSync(file, "utf-8");
+    if (!content.trim()) return [];
+    return JSON.parse(content);
+  } catch (err) {
+    console.error(`Error reading logs for node ${node}:`, err);
+    return [];
+  }
 }

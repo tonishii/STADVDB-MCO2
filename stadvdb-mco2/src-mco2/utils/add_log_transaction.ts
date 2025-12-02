@@ -1,5 +1,5 @@
 import { TransactionLogEntry } from "../lib/schema";
-import { logTransaction } from "../lib/transaction_manager";
+import { logTransaction } from "../lib/transaction_logger";
 
 export async function logger(
   transactionId: string,

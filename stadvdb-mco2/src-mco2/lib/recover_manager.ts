@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 import { TransactionLogEntry } from "./schema";
-import { logFilePath, readNodeLogs } from "./transaction_manager";
+import { logFilePath, readLogs } from "./transaction_logger";
 import { redo, undo } from "./recovery_operations";
 import { db0, db1, db2 } from "../db";
 
@@ -14,7 +14,7 @@ const nodePools = {
 };
 
 export async function recoverTransaction(node: number) {
-  const txs: TransactionLogEntry[] = await readNodeLogs(node);
+  const txs: TransactionLogEntry[] = await readLogs(node);
 
   const txMap = new Map<string, TransactionLogEntry[]>();
   for (const tx of txs) {
