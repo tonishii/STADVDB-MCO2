@@ -289,7 +289,6 @@ export default function NodeDashboard({
           <div className="grid gap-4">
             <div className="bg-gray-800 p-8 rounded border border-gray-700">
               <LogsTable rows={logsData} />
-              <p>{currentNodeId}</p>
             </div>
             <div className="bg-gray-800 p-8 rounded border border-gray-700 text-center">
               <h2 className="text-2xl font-bold text-red-500 mb-4">
