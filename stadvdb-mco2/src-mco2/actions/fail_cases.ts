@@ -315,14 +315,15 @@ export async function failCase4Write(
 
   await logger(transactionId, "0", "START");
 
-  await logUpdate(
+  await logger(
     transactionId,
-    targetNode,
-    title,
-    tconst,
+    "0",
+    "UPDATE",
+    { tconst, primaryTitle: title },
     oldValues,
     true,
-    "0"
+    "0",
+    targetNode
   );
 
   await logger(transactionId, "0", "COMMIT");
